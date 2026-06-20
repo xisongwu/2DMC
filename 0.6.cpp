@@ -93,8 +93,7 @@ string test[150] = {
     " \b木箭",       " \b铁箭",       " \b爆炸箭",     " \b铁剑",
     " \b铁斧",       " \b钻石剑",     " \b钻石斧",     " \bOI核心",
     " \b递归",       " \b雪",         " \b冰",         " \b苹果",
-    " \b钻石锭",     " \b钻石头盔",   " \b钻石胸甲",   " \b钻石护腿",
-    " \b钻石靴子"};
+    " \b钻石头盔",   " \b钻石胸甲",   " \b钻石护腿",   " \b钻石靴子"};
 int beibao[101][2];
 short boimes[5005];
 short boimes2[5005];
@@ -3997,28 +3996,28 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
   Setpos(19, 9);
   if (wear[1] == 27)
     cout << " 铁胸甲   ";
-  else if (wear[1] == 62)
+  else if (wear[1] == 51)
     cout << " 钻石胸甲 ";
   else
     cout << " 胸甲位   ";
   Setpos(19, 12);
   if (wear[2] == 28)
     cout << " 铁护腿   ";
-  else if (wear[2] == 63)
+  else if (wear[2] == 52)
     cout << " 钻石护腿 ";
   else
     cout << " 护腿位   ";
   Setpos(24, 9);
   if (wear[3] == 29)
     cout << " 铁头盔   ";
-  else if (wear[3] == 61)
+  else if (wear[3] == 50)
     cout << " 钻石头盔 ";
   else
     cout << " 头盔位   ";
   Setpos(24, 12);
   if (wear[4] == 30)
     cout << " 铁靴子   ";
-  else if (wear[4] == 64)
+  else if (wear[4] == 53)
     cout << " 钻石靴子 ";
   else
     cout << " 靴子位  ";
@@ -4070,13 +4069,13 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
     Setpos(6, 22);
     cout << "  4铁锭->铁靴子";
     Setpos(6, 23);
-    cout << "  8钻石锭->钻石头盔";
+    cout << "  8钻石->钻石头盔";
     Setpos(6, 24);
-    cout << "  7钻石锭->钻石胸甲";
+    cout << "  7钻石->钻石胸甲";
     Setpos(6, 25);
-    cout << "  5钻石锭->钻石护腿";
+    cout << "  5钻石->钻石护腿";
     Setpos(6, 26);
-    cout << "  4钻石锭->钻石靴子";
+    cout << "  4钻石->钻石靴子";
     Setpos(6, 27);
     cout << "  下一页";
   } else if (num == 2) {
@@ -4084,8 +4083,6 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
     cout << " 熔炼配方：";
     Setpos(6, 8);
     cout << "  1粗铁+1煤炭->1铁锭";
-    Setpos(6, 9);
-    cout << "  1下界石英->1钻石锭";
   } else if (num == 3) {
     Setpos(6, 7);
     cout << " 合成配方：";
@@ -4179,24 +4176,24 @@ void movethings(int upd) {
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 62 && (c_thing == -7 || c_thing == -8 ||
+          } else if (beibao[cc][0] == 51 && (c_thing == -7 || c_thing == -8 ||
                                       c_thing == -2 || c_thing == -3)) {
-            wear[1] = 62;
+            wear[1] = 51;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 63 && (c_thing == 2 || c_thing == 1)) {
-            wear[2] = 63;
+          } else if (beibao[cc][0] == 52 && (c_thing == 2 || c_thing == 1)) {
+            wear[2] = 52;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 61 && (c_thing == -6 || c_thing == -1)) {
-            wear[3] = 61;
+          } else if (beibao[cc][0] == 50 && (c_thing == -6 || c_thing == -1)) {
+            wear[3] = 50;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 64 && (c_thing == 3)) {
-            wear[4] = 64;
+          } else if (beibao[cc][0] == 53 && (c_thing == 3)) {
+            wear[4] = 53;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
@@ -4527,7 +4524,6 @@ void craft_2() {
       anx = 0;
     movethings(2);
     zz(-5, 1, 3, 1, 4, 13, 1, 2);
-    zz2(-4, 1, 38, 60, 1, 2);
   }
   setlight();
   memset(painting, 114, sizeof(painting));
@@ -4579,10 +4575,10 @@ void craft_1() {
       zz2(7, 7, 13, 28, 1, 1);
       zz2(8, 5, 13, 29, 1, 1);
       zz2(9, 4, 13, 30, 1, 1);
-      zz2(10, 8, 60, 61, 1, 1);
-      zz2(11, 7, 60, 62, 1, 1);
-      zz2(12, 5, 60, 63, 1, 1);
-      zz2(13, 4, 60, 64, 1, 1);
+      zz2(10, 8, 12, 50, 1, 1);
+      zz2(11, 7, 12, 51, 1, 1);
+      zz2(12, 5, 12, 52, 1, 1);
+      zz2(13, 4, 12, 53, 1, 1);
     } else {
       zz2(-5, 8, 2, 40, 1, 3);
       zz(-4, 3, 6, 3, 42, 41, 1, 3);
