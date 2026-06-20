@@ -4069,14 +4069,6 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
     Setpos(6, 22);
     cout << "  4铁锭->铁靴子";
     Setpos(6, 23);
-    cout << "  8钻石->钻石头盔";
-    Setpos(6, 24);
-    cout << "  7钻石->钻石胸甲";
-    Setpos(6, 25);
-    cout << "  5钻石->钻石护腿";
-    Setpos(6, 26);
-    cout << "  4钻石->钻石靴子";
-    Setpos(6, 27);
     cout << "  下一页";
   } else if (num == 2) {
     Setpos(6, 7);
@@ -4106,6 +4098,14 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
     cout << "  2木棍+3钻石->钻石斧";
     Setpos(6, 17);
     cout << "  4铁锭->OI";
+    Setpos(6, 18);
+    cout << "  8钻石->钻石头盔";
+    Setpos(6, 19);
+    cout << "  7钻石->钻石胸甲";
+    Setpos(6, 20);
+    cout << "  5钻石->钻石护腿";
+    Setpos(6, 21);
+    cout << "  4钻石->钻石靴子";
     Setpos(6, 23);
     cout << "  上一页";
   }
@@ -4575,10 +4575,6 @@ void craft_1() {
       zz2(7, 7, 13, 28, 1, 1);
       zz2(8, 5, 13, 29, 1, 1);
       zz2(9, 4, 13, 30, 1, 1);
-      zz2(10, 8, 12, 50, 1, 1);
-      zz2(11, 7, 12, 51, 1, 1);
-      zz2(12, 5, 12, 52, 1, 1);
-      zz2(13, 4, 12, 53, 1, 1);
     } else {
       zz2(-5, 8, 2, 40, 1, 3);
       zz(-4, 3, 6, 3, 42, 41, 1, 3);
@@ -4590,6 +4586,10 @@ void craft_1() {
       zz(2, 1, 6, 2, 12, 49, 1, 3);
       zz(3, 2, 6, 3, 12, 50, 1, 3);
       zz2(4, 4, 13, 51, 1, 3);
+      zz2(5, 8, 12, 50, 1, 3);
+      zz2(6, 7, 12, 51, 1, 3);
+      zz2(7, 5, 12, 52, 1, 3);
+      zz2(8, 4, 12, 53, 1, 3);
     }
     if (mpy == 10 && mpx < -9) {
       if (KEY_DOWN(VK_LBUTTON)) {
