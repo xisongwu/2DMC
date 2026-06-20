@@ -5393,6 +5393,10 @@ void game_loop() {
   }
 }
 int main() {
+  // 设置控制台为UTF-8编码以支持中文显示
+  SetConsoleOutputCP(65001);
+  SetConsoleCP(65001);
+  
   try {
     did();
     SetConsoleToFullscreen();
