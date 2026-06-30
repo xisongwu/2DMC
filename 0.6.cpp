@@ -3081,7 +3081,7 @@ void getin() {
   HWND hWnd = CreateWindowExA(
     WS_EX_TOPMOST | WS_EX_CLIENTEDGE,
     "2DMC_CmdWndClass",
-    "2DMC 命令",
+    "2DMC Command",
     WS_OVERLAPPEDWINDOW | WS_VISIBLE,
     100, 100, 420, 100,
     NULL, NULL, hInst, NULL
@@ -3127,7 +3127,8 @@ void execute_command(const string& cmd) {
     cout << " | /help              - 显示帮助信息                                |\n";
     cout << " | /give <item> <num> - 获得物品（如: /give diamond 10）            |\n";
     cout << " | /heal              - 恢复全部生命                                |\n";
-    cout << " | /kill              - 自杀                                       |\n";
+    cout << " | /life <num>        - 设置生命（0-20）                            |\n";
+    cout << " | /kill              - 自杀（重生到出生点）                        |\n";
     cout << " | /gamemode          - 切换创造/生存模式                           |\n";
     cout << " | /clear             - 清空背包                                   |\n";
     cout << " | /time <num>        - 设置时间（0-40000）                         |\n";
@@ -3139,10 +3140,26 @@ void execute_command(const string& cmd) {
     life = 20;
     Setpos(1, 29);
     cout << " 生命已恢复                                                    ";
+  } else if (cmd_name == "life" || cmd_name == "/life") {
+    int w = 0;
+    ss >> w;
+    if (w >= 0 && w <= 20) {
+      life = w;
+      Setpos(1, 29);
+      cout << " 生命已设置为 " << w << "                                     ";
+    } else {
+      Setpos(1, 29);
+      cout << " 错误: 生命必须在0-20之间                                      ";
+    }
   } else if (cmd_name == "kill" || cmd_name == "/kill") {
     life = 0;
+    Start();
+    spx = 0;
+    spy = 0;
+    jump = 0;
+    shuaxin();
     Setpos(1, 29);
-    cout << " 你死了                                                       ";
+    cout << " 你死了，已重生到出生点                                       ";
   } else if (cmd_name == "gamemode" || cmd_name == "/gamemode") {
     gamemode = 1 - gamemode;
     Setpos(1, 29);
