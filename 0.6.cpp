@@ -3015,42 +3015,77 @@ void InToGet() {
   //	GetIn=0;
   return;
 }
+string g_cmd_input;
+HWND g_hEdit;
 void execute_command(const string& cmd);
+
+LRESULT CALLBACK CmdWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+  switch (msg) {
+    case WM_KEYDOWN:
+      if (wParam == VK_RETURN) {
+        char buf[256];
+        GetWindowTextA(g_hEdit, buf, sizeof(buf));
+        g_cmd_input = buf;
+        DestroyWindow(hWnd);
+        return 0;
+      } else if (wParam == VK_ESCAPE) {
+        g_cmd_input = "";
+        DestroyWindow(hWnd);
+        return 0;
+      }
+      break;
+    case WM_CLOSE:
+      g_cmd_input = "";
+      DestroyWindow(hWnd);
+      return 0;
+  }
+  return DefWindowProcA(hWnd, msg, wParam, lParam);
+}
 
 void getin() {
   GetIn = -4;
-  HWND hMainConsole = GetConsoleWindow();
-  FreeConsole();
-  AllocConsole();
-  SetConsoleTitleA("2DMC 命令控制台");
-  SetConsoleOutputCP(65001);
-  SetConsoleCP(65001);
-  freopen("CONIN$", "r", stdin);
-  freopen("CONOUT$", "w", stdout);
+  g_cmd_input = "";
   
-  cout << "===========================================\n";
-  cout << "           2DMC 命令控制台\n";
-  cout << "===========================================\n";
-  cout << "输入 /help 查看可用命令\n";
-  cout << "输入 /quit 退出命令模式\n";
-  cout << "===========================================\n";
+  HINSTANCE hInst = GetModuleHandleA(NULL);
+  WNDCLASSEXA wc = {0};
+  wc.cbSize = sizeof(WNDCLASSEXA);
+  wc.lpfnWndProc = CmdWndProc;
+  wc.hInstance = hInst;
+  wc.hCursor = LoadCursorA(NULL, IDC_ARROW);
+  wc.lpszClassName = "2DMC_CmdWndClass";
+  RegisterClassExA(&wc);
   
-  string cmd;
-  while (true) {
-    cout << "> ";
-    getline(cin, cmd);
-    if (cmd.empty()) continue;
-    if (cmd == "/quit" || cmd == "quit") break;
-    execute_command(cmd);
-    cout << endl;
+  HWND hWnd = CreateWindowExA(
+    WS_EX_TOPMOST,
+    "2DMC_CmdWndClass",
+    "2DMC 命令",
+    WS_POPUP | WS_VISIBLE,
+    100, 100, 400, 60,
+    NULL, NULL, hInst, NULL
+  );
+  
+  g_hEdit = CreateWindowExA(
+    0,
+    "EDIT",
+    "",
+    WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_BORDER,
+    10, 15, 380, 25,
+    hWnd, NULL, hInst, NULL
+  );
+  
+  SetFocus(g_hEdit);
+  
+  MSG msg;
+  while (IsWindow(hWnd) && GetMessageA(&msg, NULL, 0, 0)) {
+    TranslateMessage(&msg);
+    DispatchMessageA(&msg);
   }
   
-  FreeConsole();
-  AttachConsole(ATTACH_PARENT_PROCESS);
-  freopen("CONIN$", "r", stdin);
-  freopen("CONOUT$", "w", stdout);
-  SetConsoleOutputCP(65001);
-  SetConsoleCP(65001);
+  UnregisterClassA("2DMC_CmdWndClass", hInst);
+  
+  if (!g_cmd_input.empty()) {
+    execute_command(g_cmd_input);
+  }
   SetClean();
 }
 
@@ -3060,39 +3095,49 @@ void execute_command(const string& cmd) {
   ss >> cmd_name;
   
   if (cmd_name == "help" || cmd_name == "/help") {
-    cout << "可用命令:\n";
-    cout << "  /help              - 显示帮助信息\n";
-    cout << "  /give <item> <num> - 获得物品（如: /give diamond 10）\n";
-    cout << "  /heal              - 恢复全部生命\n";
-    cout << "  /kill              - 自杀\n";
-    cout << "  /gamemode          - 切换创造/生存模式\n";
-    cout << "  /clear             - 清空背包\n";
-    cout << "  /time <num>        - 设置时间（0-40000）\n";
-    cout << "  /tp <x> <y>        - 传送到指定位置\n";
-    cout << "  /quit              - 退出命令模式\n";
+    Setpos(0, 28);
+    cout << "--------------------------------------------------------------------"
+            "-----------\n";
+    cout << " | /help              - 显示帮助信息                                |\n";
+    cout << " | /give <item> <num> - 获得物品（如: /give diamond 10）            |\n";
+    cout << " | /heal              - 恢复全部生命                                |\n";
+    cout << " | /kill              - 自杀                                       |\n";
+    cout << " | /gamemode          - 切换创造/生存模式                           |\n";
+    cout << " | /clear             - 清空背包                                   |\n";
+    cout << " | /time <num>        - 设置时间（0-40000）                         |\n";
+    cout << " | /tp <x> <y>        - 传送到指定位置                             |\n";
+    cout << " -------------------------------------------------------------------"
+            "------------";
+    Sleep(3000);
   } else if (cmd_name == "heal" || cmd_name == "/heal") {
     life = 20;
-    cout << "生命已恢复";
+    Setpos(1, 29);
+    cout << " 生命已恢复                                                    ";
   } else if (cmd_name == "kill" || cmd_name == "/kill") {
     life = 0;
-    cout << "你死了";
+    Setpos(1, 29);
+    cout << " 你死了                                                       ";
   } else if (cmd_name == "gamemode" || cmd_name == "/gamemode") {
     gamemode = 1 - gamemode;
-    cout << "游戏模式已切换为 " << (gamemode == 1 ? "创造" : "生存");
+    Setpos(1, 29);
+    cout << " 游戏模式已切换为 " << (gamemode == 1 ? "创造" : "生存") << "             ";
   } else if (cmd_name == "clear" || cmd_name == "/clear") {
     memset(beibao, 0, sizeof(beibao));
-    cout << "背包已清空";
+    Setpos(1, 29);
+    cout << " 背包已清空                                                    ";
   } else if (cmd_name == "give" || cmd_name == "/give") {
     string item_name;
     int amount = 1;
     ss >> item_name >> amount;
     if (amount <= 0 || amount > 64) {
-      cout << "错误: 数量必须在1-64之间";
+      Setpos(1, 29);
+      cout << " 错误: 数量必须在1-64之间                                      ";
       return;
     }
     auto it = thing.find(item_name);
     if (it == thing.end()) {
-      cout << "错误: 未知物品: " << item_name;
+      Setpos(1, 29);
+      cout << " 错误: 未知物品: " << item_name << "                          ";
       return;
     }
     int item_id = it->second;
@@ -3101,9 +3146,11 @@ void execute_command(const string& cmd) {
       beibao[slot][0] = item_id;
       beibao[slot][1] += amount;
       if (beibao[slot][1] > 64) beibao[slot][1] = 64;
-      cout << "已获得 " << amount << " " << test[item_id];
+      Setpos(1, 29);
+      cout << " 已获得 " << amount << " " << test[item_id] << "              ";
     } else {
-      cout << "错误: 背包已满";
+      Setpos(1, 29);
+      cout << " 错误: 背包已满                                                ";
     }
   } else if (cmd_name == "time" || cmd_name == "/time") {
     int w = 0;
@@ -3111,9 +3158,11 @@ void execute_command(const string& cmd) {
     if (w >= 0 && w <= 40000) {
       now_time = w;
       night = (w >= 20000) ? 1 : 0;
-      cout << "时间已设置为 " << w;
+      Setpos(1, 29);
+      cout << " 时间已设置为 " << w << "                                     ";
     } else {
-      cout << "错误: 时间必须在0-40000之间";
+      Setpos(1, 29);
+      cout << " 错误: 时间必须在0-40000之间                                  ";
     }
   } else if (cmd_name == "tp" || cmd_name == "/tp") {
     int w = 0, h = 0;
@@ -3122,12 +3171,15 @@ void execute_command(const string& cmd) {
       x = w;
       y = (1000 - h);
       shuaxin();
-      cout << "已传送到 (" << w << ", " << h << ")";
+      Setpos(1, 29);
+      cout << " 已传送到 (" << w << ", " << h << ")                          ";
     } else {
-      cout << "错误: 位置无效";
+      Setpos(1, 29);
+      cout << " 错误: 位置无效                                                ";
     }
   } else {
-    cout << "未知命令: " << cmd_name << "，输入 /help 查看帮助";
+    Setpos(1, 29);
+    cout << " 未知命令: " << cmd_name << "，输入 /help 查看帮助             ";
   }
 }
 short getnew[5001][1001];
