@@ -27,44 +27,67 @@ int s2[5001][1001];
 int light[5001][1001];
 int painting[102][102][2];
 bool ep[5001][5001];
-char title[256];
+wchar_t title[256];
 string name[101] = {"air",
                     "stone",
                     "wood",
-                    "BlackFire",
+                    "coal",
+                    "raw_iron",
                     "dirt",
-                    "pencil",
-                    "WoodDig",
-                    "StoneDig",
-                    "FireStone",
-                    "StrongStone",
+                    "stick",
+                    "wood_pickaxe",
+                    "stone_pickaxe",
+                    "furnace",
+                    "bedrock",
                     "sky",
-                    "BuleStone",
-                    "GeryStone",
-                    "GeryDig",
-                    "BuleDig",
-                    "FireWood",
-                    "StoneFight",
-                    "StoneCut",
+                    "diamond",
+                    "iron_ingot",
+                    "iron_pickaxe",
+                    "diamond_pickaxe",
+                    "torch",
+                    "stone_sword",
+                    "stone_axe",
                     "water",
-                    "WaterThreeInFour",
-                    "WaterTwoInFour",
-                    "WaterOneInFour",
+                    "flowing_water_3",
+                    "flowing_water_2",
+                    "flowing_water_1",
                     "leaf",
-                    "LifeDrink",
-                    "bottle",
-                    "WaterBottle",
-                    "GeryShirt",
-                    "GeryPants",
-                    "GeryHat",
-                    "GeryShoes",
-                    "SaveMe",
-                    "FireHot",
-                    "FireHotTwoInThree",
-                    "FireHotOneInThree",
-                    "FireBottle",
-                    "BlackStrongStone",
-                    "BadMeat"};
+                    "health_potion",
+                    "bucket",
+                    "water_bucket",
+                    "iron_chestplate",
+                    "iron_leggings",
+                    "iron_helmet",
+                    "iron_boots",
+                    "shield",
+                    "lava",
+                    "flowing_lava_2",
+                    "flowing_lava_1",
+                    "lava_bucket",
+                    "obsidian",
+                    "rotten_flesh",
+                    "nether_portal",
+                    "netherrack",
+                    "chest",
+                    "bow",
+                    "string",
+                    "gunpowder",
+                    "wood_arrow",
+                    "iron_arrow",
+                    "explosive_arrow",
+                    "iron_sword",
+                    "iron_axe",
+                    "diamond_sword",
+                    "diamond_axe",
+                    "oi_core",
+                    "recursive",
+                    "snow",
+                    "ice",
+                    "apple",
+                    "diamond_helmet",
+                    "diamond_chestplate",
+                    "diamond_leggings",
+                    "diamond_boots"};
 map<string, int> thing;
 int blockwj[101] = {0,    200, 200, 400, 800, 100, 0,   0,  0,  200, -1, 0,
                     1200, 0,   0,   0,   5,   -1,  0,   -1, -1, -1,  -1, 12,
@@ -286,6 +309,13 @@ void Color(int a) {
                             BACKGROUND_RED | BACKGROUND_BLUE);
   if (a == -34)
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_BLUE);
+  if (a == -35)
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+                            BACKGROUND_INTENSITY | BACKGROUND_GREEN | BACKGROUND_BLUE |
+                            FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+  if (a == -36)
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+                            BACKGROUND_BLUE | FOREGROUND_INTENSITY | FOREGROUND_BLUE);
 }
 void HideCursor() {
   CONSOLE_CURSOR_INFO cursor_info = {1, 0};
@@ -885,12 +915,20 @@ void hujia_update() {
   hujiazhi = 0;
   if (wear[1] == 27)
     hujiazhi += 6;
+  else if (wear[1] == 57)
+    hujiazhi += 8;
   if (wear[2] == 28)
     hujiazhi += 5;
+  else if (wear[2] == 58)
+    hujiazhi += 6;
   if (wear[3] == 29)
     hujiazhi += 2;
+  else if (wear[3] == 56)
+    hujiazhi += 3;
   if (wear[4] == 30)
     hujiazhi += 2;
+  else if (wear[4] == 59)
+    hujiazhi += 3;
   jianshang = 1 - hujiazhi * 0.04;
 }
 void st(int type, int x, int y, int ra2) {
@@ -1652,8 +1690,8 @@ void Updateblock(bool ismap) {
       Color(-1), co = -1;
     printf("  ");
   } else if (s[dx][dy] == 54) {
-    if (co != -34)
-      Color(-34), co = -34;
+    if (co != -36)
+      Color(-36), co = -36;
     printf("  ");
   }
 }
@@ -1958,8 +1996,8 @@ void UpdateFPS() {
     fps = frameCount / deltaTime;
     frameCount = 0;
     lastTime = currentTime;
-    sprintf(title, "我的世界 - FPS: %.2f", fps);
-    SetWindowTextA(GetConsoleWindow(), title);
+    swprintf(title, 256, L"我的世界 - FPS: %.2f", fps);
+    SetWindowTextW(GetConsoleWindow(), title);
   }
 }
 int sdprint[100][60][2];
@@ -2976,6 +3014,53 @@ void InToGet() {
   //	GetIn=0;
   return;
 }
+void cmd_help() {
+  Setpos(0, 28);
+  cout << "--------------------------------------------------------------------"
+          "-----------\n";
+  cout << " | /help              - 显示帮助信息                                |\n";
+  cout << " | /give <item> <num> - 获得物品（如: /give diamond 10）            |\n";
+  cout << " | /heal              - 恢复全部生命                                |\n";
+  cout << " | /kill              - 自杀                                       |\n";
+  cout << " | /gamemode          - 切换创造/生存模式                           |\n";
+  cout << " | /clear             - 清空背包                                   |\n";
+  cout << " | /time <num>        - 设置时间（0-40000）                         |\n";
+  cout << " | /tp <x> <y>        - 传送到指定位置                             |\n";
+  cout << " | /set life <num>    - 设置生命                                   |\n";
+  cout << " | /get <item> to <slot> - 获取物品到指定背包格子                   |\n";
+  cout << " | /quit              - 退出命令模式                               |\n";
+  cout << " -------------------------------------------------------------------"
+          "------------";
+  Sleep(3000);
+  SetClean();
+}
+
+void cmd_give(const string& item_name, int amount) {
+  if (amount <= 0 || amount > 64) {
+    Setpos(1, 29);
+    cout << " 数量必须在1-64之间                                          ";
+    return;
+  }
+  auto it = thing.find(item_name);
+  if (it == thing.end()) {
+    Setpos(1, 29);
+    cout << " 未知物品: " << item_name << "                                      ";
+    return;
+  }
+  int item_id = it->second;
+  int slot = getbeibao(item_id);
+  if (slot > 0) {
+    beibao[slot][0] = item_id;
+    beibao[slot][1] += amount;
+    if (beibao[slot][1] > 64) beibao[slot][1] = 64;
+    Setpos(1, 29);
+    cout << " 已获得 " << amount << " " << test[item_id] << "                    ";
+  } else {
+    Setpos(1, 29);
+    cout << " 背包已满                                                    ";
+  }
+}
+
 void getin() {
   GetIn = -4;
   Setpos(0, 28);
@@ -2997,13 +3082,95 @@ void getin() {
         SetClean();
         return;
       }
+      if (ny == '\b' && !nx.empty()) {
+        nx.pop_back();
+        cout << "\b \b";
+        continue;
+      }
       if (ny == (char)(32) || ny == '\r') break;
-      if (nx.size() < 8) {
+      if (nx.size() < 16) {
         nx += ny;
         cout << ny;
       }
     }
-    if (nx == "set") {
+    if (nx == "help") {
+      cmd_help();
+      return;
+    } else if (nx == "heal") {
+      life = 20;
+      Setpos(1, 29);
+      cout << " 生命已恢复                                                    ";
+      return;
+    } else if (nx == "kill") {
+      life = 0;
+      Setpos(1, 29);
+      cout << " 你死了                                                       ";
+      return;
+    } else if (nx == "gamemode") {
+      gamemode = 1 - gamemode;
+      Setpos(1, 29);
+      cout << " 游戏模式已切换为 " << (gamemode == 1 ? "创造" : "生存") << "             ";
+      return;
+    } else if (nx == "clear") {
+      memset(beibao, 0, sizeof(beibao));
+      Setpos(1, 29);
+      cout << " 背包已清空                                                    ";
+      return;
+    } else if (nx == "give") {
+      string item_name;
+      char t = 0;
+      while (t != (char)(32) && t != '\r') {
+        t = _getch();
+        if (t == '/') return;
+        if (t == '\b' && !item_name.empty()) {
+          item_name.pop_back();
+          cout << "\b \b";
+          continue;
+        }
+        if (t == (char)(32) || t == '\r') break;
+        item_name += t;
+        cout << t;
+      }
+      if (t == '\r') {
+        Setpos(1, 29);
+        cout << " 缺少数量参数                                                  ";
+        return;
+      }
+      int amount = 0;
+      cout << " ";
+      t = 0;
+      while (t != '\r') {
+        t = _getch();
+        if (t == '/') return;
+        if (t >= '0' && t <= '9') {
+          amount = (t - '0') + amount * 10;
+          cout << t;
+        }
+      }
+      cmd_give(item_name, amount);
+      return;
+    } else if (nx == "time") {
+      int w = 0;
+      char t = 0;
+      while (t != '\r') {
+        t = _getch();
+        if (t == '/') return;
+        if (t >= '0' && t <= '9') {
+          w = (t - '0') + w * 10;
+          cout << t;
+        }
+      }
+      if (w >= 0 && w <= 40000) {
+        now_time = w;
+        night = (w >= 20000) ? 1 : 0;
+        Setpos(1, 29);
+        cout << " 时间已设置                                                    ";
+      } else {
+        Setpos(1, 29);
+        cout << " 时间必须在0-40000之间                                        ";
+      }
+      return;
+    } else if (nx == "set") {
       InToSet();
       Setpos(1, 29);
       std::cout << " 已完成                                          ";
@@ -3052,7 +3219,7 @@ void getin() {
       }
     } else {
       Setpos(1, 29);
-      cout << " 不正确的指令                                            ";
+      cout << " 不正确的指令，输入/help查看帮助                           ";
       return;
     }
   }
@@ -3996,28 +4163,28 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
   Setpos(19, 9);
   if (wear[1] == 27)
     cout << " 铁胸甲   ";
-  else if (wear[1] == 51)
+  else if (wear[1] == 57)
     cout << " 钻石胸甲 ";
   else
     cout << " 胸甲位   ";
   Setpos(19, 12);
   if (wear[2] == 28)
     cout << " 铁护腿   ";
-  else if (wear[2] == 52)
+  else if (wear[2] == 58)
     cout << " 钻石护腿 ";
   else
     cout << " 护腿位   ";
   Setpos(24, 9);
   if (wear[3] == 29)
     cout << " 铁头盔   ";
-  else if (wear[3] == 50)
+  else if (wear[3] == 56)
     cout << " 钻石头盔 ";
   else
     cout << " 头盔位   ";
   Setpos(24, 12);
   if (wear[4] == 30)
     cout << " 铁靴子   ";
-  else if (wear[4] == 53)
+  else if (wear[4] == 59)
     cout << " 钻石靴子 ";
   else
     cout << " 靴子位  ";
@@ -4049,24 +4216,22 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
     Setpos(6, 12);
     cout << "  2木棍+3铁锭->铁镐";
     Setpos(6, 13);
-    cout << "  2木棍+3钻石->钻石镐";
-    Setpos(6, 14);
     cout << "  10黑曜石->下界传送门";
-    Setpos(6, 15);
+    Setpos(6, 14);
     cout << "  1木棍+1煤炭->5火把";
-    Setpos(6, 16);
+    Setpos(6, 15);
     cout << "  1木棍+2圆石->石剑";
-    Setpos(6, 17);
+    Setpos(6, 16);
     cout << "  2木棍+3原石->石斧";
-    Setpos(6, 18);
+    Setpos(6, 17);
     cout << "  3铁锭->桶";
-    Setpos(6, 19);
+    Setpos(6, 18);
     cout << "  8铁锭->铁胸甲";
-    Setpos(6, 20);
+    Setpos(6, 19);
     cout << "  7铁锭->铁护腿";
-    Setpos(6, 21);
+    Setpos(6, 20);
     cout << "  5铁锭->铁头盔";
-    Setpos(6, 22);
+    Setpos(6, 21);
     cout << "  4铁锭->铁靴子";
     Setpos(6, 23);
     cout << "  下一页";
@@ -4093,18 +4258,20 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
     Setpos(6, 14);
     cout << "  2木棍+3铁锭->铁斧";
     Setpos(6, 15);
-    cout << "  1木棍+2钻石->钻石剑";
+    cout << "  2木棍+3钻石->钻石镐";
     Setpos(6, 16);
-    cout << "  2木棍+3钻石->钻石斧";
+    cout << "  1木棍+2钻石->钻石剑";
     Setpos(6, 17);
-    cout << "  4铁锭->OI";
+    cout << "  2木棍+3钻石->钻石斧";
     Setpos(6, 18);
-    cout << "  8钻石->钻石头盔";
+    cout << "  4铁锭->OI";
     Setpos(6, 19);
-    cout << "  7钻石->钻石胸甲";
+    cout << "  8钻石->钻石头盔";
     Setpos(6, 20);
-    cout << "  5钻石->钻石护腿";
+    cout << "  7钻石->钻石胸甲";
     Setpos(6, 21);
+    cout << "  5钻石->钻石护腿";
+    Setpos(6, 22);
     cout << "  4钻石->钻石靴子";
     Setpos(6, 23);
     cout << "  上一页";
@@ -4113,10 +4280,53 @@ void craft_update(int num, bool isprintback = 0, bool ischangecolor = 0) {
 short AN;
 void movethings(int upd) {
   int c_thing = 0, cc = 0;
+  int wear_slot = 0; // 护甲栏位置索引
   POINT p = GetMousePos();
   bool upda = (mpx != To_int(p.x / 2 - 26) || mpy != To_int(p.y - 14));
   mpx = To_int(p.x / 2 - 26);
   mpy = To_int(p.y - 14);
+  c_thing = int((mpx + 12) / 4 + 0.5) + int(mpy / 2 * 5 + 0.5);
+  // 检测护甲栏点击
+  if (c_thing == -7 || c_thing == -8 || c_thing == -2 || c_thing == -3)
+    wear_slot = 1; // 胸甲位
+  else if (c_thing == 2 || c_thing == 1)
+    wear_slot = 2; // 护腿位
+  else if (c_thing == -6 || c_thing == -1)
+    wear_slot = 3; // 头盔位
+  else if (c_thing == 3)
+    wear_slot = 4; // 靴子位
+
+  if (wear_slot > 0 && wear[wear_slot] != 0) {
+    if (KEY_DOWN(VK_LBUTTON)) {
+      int wear_item = wear[wear_slot];
+      while (KEY_DOWN(VK_LBUTTON))
+        continue;
+      while (!(KEY_DOWN(VK_LBUTTON))) {
+        POINT p = GetMousePos();
+        mpx = To_int(p.x / 2 - 26);
+        mpy = To_int(p.y - 14);
+        c_thing = int((mpx + 12) / 4 + 0.5) + int(mpy / 2 * 5 + 0.5);
+      }
+      if (KEY_DOWN(VK_LBUTTON)) {
+        POINT p = GetMousePos();
+        mpx = To_int(p.x / 2 - 26);
+        mpy = To_int(p.y - 14);
+        c_thing = int((mpx + 12) / 4 + 0.5) + int(mpy / 2 * 5 + 0.5);
+        // 拖到背包格子时卸下盔甲
+        if (c_thing > 0 && c_thing < 26) {
+          int O = getbeibao(wear_item);
+          beibao[O][0] = wear_item;
+          beibao[O][1] += 1;
+          wear[wear_slot] = 0;
+          hujia_update();
+          craft_update(upd);
+        }
+      }
+      while (KEY_DOWN(VK_LBUTTON))
+        continue;
+    }
+  }
+
   if (!(int((mpx + 12) / 4 + 0.5) > 5 || int((mpx + 12) / 4 + 0.5) < 1 ||
         int(mpy / 2 * 5 + 0.5) > 21 || int(mpy + 0.5) < 1)) {
     c_thing = int((mpx + 12) / 4 + 0.5) + int(mpy / 2 * 5 + 0.5);
@@ -4176,24 +4386,24 @@ void movethings(int upd) {
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 51 && (c_thing == -7 || c_thing == -8 ||
+          } else if (beibao[cc][0] == 57 && (c_thing == -7 || c_thing == -8 ||
                                       c_thing == -2 || c_thing == -3)) {
-            wear[1] = 51;
+            wear[1] = 57;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 52 && (c_thing == 2 || c_thing == 1)) {
-            wear[2] = 52;
+          } else if (beibao[cc][0] == 58 && (c_thing == 2 || c_thing == 1)) {
+            wear[2] = 58;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 50 && (c_thing == -6 || c_thing == -1)) {
-            wear[3] = 50;
+          } else if (beibao[cc][0] == 56 && (c_thing == -6 || c_thing == -1)) {
+            wear[3] = 56;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
-          } else if (beibao[cc][0] == 53 && (c_thing == 3)) {
-            wear[4] = 53;
+          } else if (beibao[cc][0] == 59 && (c_thing == 3)) {
+            wear[4] = 59;
             beibao[cc][0] = 0;
             beibao[cc][1] = 0;
             craft_update(upd);
@@ -4565,16 +4775,15 @@ void craft_1() {
       zz(-3, 5, 1, 2, 6, 8, 1, 1);
       zz(-2, 20, 1, 5, 3, 9, 1, 1);
       zz(-1, 3, 13, 2, 6, 14, 1, 1);
-      zz(0, 3, 12, 2, 6, 15, 1, 1);
-      zz2(1, 10, 36, 38, 1, 1);
-      zz(2, 1, 3, 1, 6, 16, 5, 1);
-      zz(3, 1, 6, 2, 1, 17, 1, 1);
-      zz(4, 2, 6, 3, 1, 18, 1, 1);
-      zz2(5, 3, 13, 25, 1, 1);
-      zz2(6, 8, 13, 27, 1, 1);
-      zz2(7, 7, 13, 28, 1, 1);
-      zz2(8, 5, 13, 29, 1, 1);
-      zz2(9, 4, 13, 30, 1, 1);
+      zz2(0, 10, 36, 38, 1, 1);
+      zz(1, 1, 3, 1, 6, 16, 5, 1);
+      zz(2, 1, 6, 2, 1, 17, 1, 1);
+      zz(3, 2, 6, 3, 1, 18, 1, 1);
+      zz2(4, 3, 13, 25, 1, 1);
+      zz2(5, 8, 13, 27, 1, 1);
+      zz2(6, 7, 13, 28, 1, 1);
+      zz2(7, 5, 13, 29, 1, 1);
+      zz2(8, 4, 13, 30, 1, 1);
     } else {
       zz2(-5, 8, 2, 40, 1, 3);
       zz(-4, 3, 6, 3, 42, 41, 1, 3);
@@ -4583,13 +4792,14 @@ void craft_1() {
       zz(-1, 1, 6, 1, 43, 46, 8, 3);
       zz(0, 1, 6, 2, 13, 47, 1, 3);
       zz(1, 2, 6, 3, 13, 48, 1, 3);
-      zz(2, 1, 6, 2, 12, 49, 1, 3);
-      zz(3, 2, 6, 3, 12, 50, 1, 3);
-      zz2(4, 4, 13, 51, 1, 3);
-      zz2(5, 8, 12, 50, 1, 3);
-      zz2(6, 7, 12, 51, 1, 3);
-      zz2(7, 5, 12, 52, 1, 3);
-      zz2(8, 4, 12, 53, 1, 3);
+      zz(2, 3, 12, 2, 6, 15, 1, 3);
+      zz(3, 1, 6, 2, 12, 49, 1, 3);
+      zz(4, 2, 6, 3, 12, 50, 1, 3);
+      zz2(5, 4, 13, 51, 1, 3);
+      zz2(6, 8, 12, 56, 1, 3);
+      zz2(7, 7, 12, 57, 1, 3);
+      zz2(8, 5, 12, 58, 1, 3);
+      zz2(9, 4, 12, 59, 1, 3);
     }
     if (mpy == 10 && mpx < -9) {
       if (KEY_DOWN(VK_LBUTTON)) {
@@ -4842,7 +5052,7 @@ void SetWindowSize(int cols, int lines) {
   MoveWindow(console, r.left, r.top, cols * 8, lines * 16, TRUE);
 }
 void did() {
-  for (int x = 0; x < 37; x++) {
+  for (int x = 0; x < 60; x++) {
     thing.insert({name[x], x});
   }
 }
@@ -5004,7 +5214,7 @@ void game_loop() {
   hujia_update();
   slow_update = 400;
   while (1) {
-    if (clock() - Clocknum >= 15 * setfps) {
+    if (setfps == 0 || clock() - Clocknum >= 15 * setfps) {
       GetIn += (GetIn >= 1 ? 0 : 1);
       keybd_event(VK_MENU, 0, 0, 0);               // 按下
       keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0); // 释放
@@ -5499,7 +5709,7 @@ int main() {
           cout << "   #     ####     ###    #   #  #####  #####  #   #  #   #  "
                   "#        #";
           Setpos(40, 12);
-          cout << "Alpha 0.5.5";
+          cout << "Alpha 0.6";
         };
         POINT p = GetMousePos();
         mpx = To_int(p.x / 2 - 26);
