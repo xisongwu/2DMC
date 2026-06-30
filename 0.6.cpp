@@ -3021,14 +3021,14 @@ void execute_command(const string& cmd);
 
 LRESULT CALLBACK CmdWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
-    case WM_KEYDOWN:
-      if (wParam == VK_RETURN) {
+    case WM_COMMAND:
+      if (LOWORD(wParam) == 1001 && HIWORD(wParam) == EN_CHANGE) {
         char buf[256];
         GetWindowTextA(g_hEdit, buf, sizeof(buf));
-        g_cmd_input = buf;
-        DestroyWindow(hWnd);
-        return 0;
-      } else if (wParam == VK_ESCAPE) {
+      }
+      break;
+    case WM_KEYDOWN:
+      if (wParam == VK_ESCAPE) {
         g_cmd_input = "";
         DestroyWindow(hWnd);
         return 0;
@@ -3038,8 +3038,30 @@ LRESULT CALLBACK CmdWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
       g_cmd_input = "";
       DestroyWindow(hWnd);
       return 0;
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
   }
   return DefWindowProcA(hWnd, msg, wParam, lParam);
+}
+
+LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+  switch (msg) {
+    case WM_KEYDOWN:
+      if (wParam == VK_RETURN) {
+        char buf[256];
+        GetWindowTextA(hWnd, buf, sizeof(buf));
+        g_cmd_input = buf;
+        DestroyWindow(GetParent(hWnd));
+        return 0;
+      } else if (wParam == VK_ESCAPE) {
+        g_cmd_input = "";
+        DestroyWindow(GetParent(hWnd));
+        return 0;
+      }
+      break;
+  }
+  return CallWindowProcA((WNDPROC)GetWindowLongPtrA(hWnd, GWLP_USERDATA), hWnd, msg, wParam, lParam);
 }
 
 void getin() {
@@ -3052,15 +3074,16 @@ void getin() {
   wc.lpfnWndProc = CmdWndProc;
   wc.hInstance = hInst;
   wc.hCursor = LoadCursorA(NULL, IDC_ARROW);
+  wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
   wc.lpszClassName = "2DMC_CmdWndClass";
   RegisterClassExA(&wc);
   
   HWND hWnd = CreateWindowExA(
-    WS_EX_TOPMOST,
+    WS_EX_TOPMOST | WS_EX_CLIENTEDGE,
     "2DMC_CmdWndClass",
     "2DMC 命令",
-    WS_POPUP | WS_VISIBLE,
-    100, 100, 400, 60,
+    WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+    100, 100, 420, 100,
     NULL, NULL, hInst, NULL
   );
   
@@ -3070,13 +3093,16 @@ void getin() {
     "",
     WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_BORDER,
     10, 15, 380, 25,
-    hWnd, NULL, hInst, NULL
+    hWnd, (HMENU)1001, hInst, NULL
   );
+  
+  SetWindowLongPtrA(g_hEdit, GWLP_USERDATA, (LONG_PTR)GetWindowLongPtrA(g_hEdit, GWLP_WNDPROC));
+  SetWindowLongPtrA(g_hEdit, GWLP_WNDPROC, (LONG_PTR)EditWndProc);
   
   SetFocus(g_hEdit);
   
   MSG msg;
-  while (IsWindow(hWnd) && GetMessageA(&msg, NULL, 0, 0)) {
+  while (GetMessageA(&msg, NULL, 0, 0)) {
     TranslateMessage(&msg);
     DispatchMessageA(&msg);
   }
