@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <time.h>
 
 // #include<thread>
@@ -3014,216 +3015,120 @@ void InToGet() {
   //	GetIn=0;
   return;
 }
-void cmd_help() {
-  Setpos(0, 28);
-  cout << "--------------------------------------------------------------------"
-          "-----------\n";
-  cout << " | /help              - 显示帮助信息                                |\n";
-  cout << " | /give <item> <num> - 获得物品（如: /give diamond 10）            |\n";
-  cout << " | /heal              - 恢复全部生命                                |\n";
-  cout << " | /kill              - 自杀                                       |\n";
-  cout << " | /gamemode          - 切换创造/生存模式                           |\n";
-  cout << " | /clear             - 清空背包                                   |\n";
-  cout << " | /time <num>        - 设置时间（0-40000）                         |\n";
-  cout << " | /tp <x> <y>        - 传送到指定位置                             |\n";
-  cout << " | /set life <num>    - 设置生命                                   |\n";
-  cout << " | /get <item> to <slot> - 获取物品到指定背包格子                   |\n";
-  cout << " | /quit              - 退出命令模式                               |\n";
-  cout << " -------------------------------------------------------------------"
-          "------------";
-  Sleep(3000);
-  SetClean();
-}
-
-void cmd_give(const string& item_name, int amount) {
-  if (amount <= 0 || amount > 64) {
-    Setpos(1, 29);
-    cout << " 数量必须在1-64之间                                          ";
-    return;
-  }
-  auto it = thing.find(item_name);
-  if (it == thing.end()) {
-    Setpos(1, 29);
-    cout << " 未知物品: " << item_name << "                                      ";
-    return;
-  }
-  int item_id = it->second;
-  int slot = getbeibao(item_id);
-  if (slot > 0) {
-    beibao[slot][0] = item_id;
-    beibao[slot][1] += amount;
-    if (beibao[slot][1] > 64) beibao[slot][1] = 64;
-    Setpos(1, 29);
-    cout << " 已获得 " << amount << " " << test[item_id] << "                    ";
-  } else {
-    Setpos(1, 29);
-    cout << " 背包已满                                                    ";
-  }
-}
+void execute_command(const string& cmd);
 
 void getin() {
   GetIn = -4;
-  Setpos(0, 28);
-  cout << "--------------------------------------------------------------------"
-          "-----------\n";
-  cout << " |                                                                  "
-          "           |\n";
-  cout << " -------------------------------------------------------------------"
-          "------------";
-  Setpos(1, 29);
-  while (_kbhit()) _getch();
-  string nx;
-  while (1) {
-    nx.clear();
-    char ny = 0;
-    while (ny != (char)(32) && ny != '\r') {
-      ny = _getch();
-      if (ny == '/') {
-        SetClean();
-        return;
-      }
-      if (ny == '\b' && !nx.empty()) {
-        nx.pop_back();
-        cout << "\b \b";
-        continue;
-      }
-      if (ny == (char)(32) || ny == '\r') break;
-      if (nx.size() < 16) {
-        nx += ny;
-        cout << ny;
-      }
-    }
-    if (nx == "help") {
-      cmd_help();
-      return;
-    } else if (nx == "heal") {
-      life = 20;
-      Setpos(1, 29);
-      cout << " 生命已恢复                                                    ";
-      return;
-    } else if (nx == "kill") {
-      life = 0;
-      Setpos(1, 29);
-      cout << " 你死了                                                       ";
-      return;
-    } else if (nx == "gamemode") {
-      gamemode = 1 - gamemode;
-      Setpos(1, 29);
-      cout << " 游戏模式已切换为 " << (gamemode == 1 ? "创造" : "生存") << "             ";
-      return;
-    } else if (nx == "clear") {
-      memset(beibao, 0, sizeof(beibao));
-      Setpos(1, 29);
-      cout << " 背包已清空                                                    ";
-      return;
-    } else if (nx == "give") {
-      string item_name;
-      char t = 0;
-      while (t != (char)(32) && t != '\r') {
-        t = _getch();
-        if (t == '/') return;
-        if (t == '\b' && !item_name.empty()) {
-          item_name.pop_back();
-          cout << "\b \b";
-          continue;
-        }
-        if (t == (char)(32) || t == '\r') break;
-        item_name += t;
-        cout << t;
-      }
-      if (t == '\r') {
-        Setpos(1, 29);
-        cout << " 缺少数量参数                                                  ";
-        return;
-      }
-      int amount = 0;
-      cout << " ";
-      t = 0;
-      while (t != '\r') {
-        t = _getch();
-        if (t == '/') return;
-        if (t >= '0' && t <= '9') {
-          amount = (t - '0') + amount * 10;
-          cout << t;
-        }
-      }
-      cmd_give(item_name, amount);
-      return;
-    } else if (nx == "time") {
-      int w = 0;
-      char t = 0;
-      while (t != '\r') {
-        t = _getch();
-        if (t == '/') return;
-        if (t >= '0' && t <= '9') {
-          w = (t - '0') + w * 10;
-          cout << t;
-        }
-      }
-      if (w >= 0 && w <= 40000) {
-        now_time = w;
-        night = (w >= 20000) ? 1 : 0;
-        Setpos(1, 29);
-        cout << " 时间已设置                                                    ";
-      } else {
-        Setpos(1, 29);
-        cout << " 时间必须在0-40000之间                                        ";
-      }
-      return;
-    } else if (nx == "set") {
-      InToSet();
-      Setpos(1, 29);
-      std::cout << " 已完成                                          ";
-      return;
-    } else if (nx == "get") {
-      InToGet();
-      Setpos(1, 29);
-      std::cout << " 已完成                                          ";
-      return;
-    } else if (nx == "tp") {
-      int h = 0, w = 0;
-      char t = 0;
-      while (t != (char)(32) && t != '\r') {
-        t = _getch();
-        if (t == '/') return;
-        if (t >= '0' && t <= '9') {
-          w = (t - '0') + w * 10;
-          cout << t;
-        }
-      }
-      if (t == '\r') {
-        Setpos(1, 29);
-        std::cout << " 错误位置                                          ";
-        return;
-      }
-      cout << " ";
-      t = 0;
-      while (t != '\r') {
-        t = _getch();
-        if (t == '/') return;
-        if (t >= '0' && t <= '9') {
-          h = (t - '0') + h * 10;
-          cout << t;
-        }
-      }
-      if (w <= 5000 && h <= 1000) {
-        x = w, y = (1000 - h);
-        Setpos(1, 29);
-        std::cout << " 已完成                                          ";
-        shuaxin();
-        return;
-      } else {
-        Setpos(1, 29);
-        std::cout << " 错误位置                                          ";
-        return;
-      }
-    } else {
-      Setpos(1, 29);
-      cout << " 不正确的指令，输入/help查看帮助                           ";
-      return;
-    }
+  HWND hMainConsole = GetConsoleWindow();
+  FreeConsole();
+  AllocConsole();
+  SetConsoleTitleA("2DMC 命令控制台");
+  SetConsoleOutputCP(65001);
+  SetConsoleCP(65001);
+  freopen("CONIN$", "r", stdin);
+  freopen("CONOUT$", "w", stdout);
+  
+  cout << "===========================================\n";
+  cout << "           2DMC 命令控制台\n";
+  cout << "===========================================\n";
+  cout << "输入 /help 查看可用命令\n";
+  cout << "输入 /quit 退出命令模式\n";
+  cout << "===========================================\n";
+  
+  string cmd;
+  while (true) {
+    cout << "> ";
+    getline(cin, cmd);
+    if (cmd.empty()) continue;
+    if (cmd == "/quit" || cmd == "quit") break;
+    execute_command(cmd);
+    cout << endl;
   }
-  Setpos(0, 28);
+  
+  FreeConsole();
+  AttachConsole(ATTACH_PARENT_PROCESS);
+  freopen("CONIN$", "r", stdin);
+  freopen("CONOUT$", "w", stdout);
+  SetConsoleOutputCP(65001);
+  SetConsoleCP(65001);
+  SetClean();
+}
+
+void execute_command(const string& cmd) {
+  stringstream ss(cmd);
+  string cmd_name;
+  ss >> cmd_name;
+  
+  if (cmd_name == "help" || cmd_name == "/help") {
+    cout << "可用命令:\n";
+    cout << "  /help              - 显示帮助信息\n";
+    cout << "  /give <item> <num> - 获得物品（如: /give diamond 10）\n";
+    cout << "  /heal              - 恢复全部生命\n";
+    cout << "  /kill              - 自杀\n";
+    cout << "  /gamemode          - 切换创造/生存模式\n";
+    cout << "  /clear             - 清空背包\n";
+    cout << "  /time <num>        - 设置时间（0-40000）\n";
+    cout << "  /tp <x> <y>        - 传送到指定位置\n";
+    cout << "  /quit              - 退出命令模式\n";
+  } else if (cmd_name == "heal" || cmd_name == "/heal") {
+    life = 20;
+    cout << "生命已恢复";
+  } else if (cmd_name == "kill" || cmd_name == "/kill") {
+    life = 0;
+    cout << "你死了";
+  } else if (cmd_name == "gamemode" || cmd_name == "/gamemode") {
+    gamemode = 1 - gamemode;
+    cout << "游戏模式已切换为 " << (gamemode == 1 ? "创造" : "生存");
+  } else if (cmd_name == "clear" || cmd_name == "/clear") {
+    memset(beibao, 0, sizeof(beibao));
+    cout << "背包已清空";
+  } else if (cmd_name == "give" || cmd_name == "/give") {
+    string item_name;
+    int amount = 1;
+    ss >> item_name >> amount;
+    if (amount <= 0 || amount > 64) {
+      cout << "错误: 数量必须在1-64之间";
+      return;
+    }
+    auto it = thing.find(item_name);
+    if (it == thing.end()) {
+      cout << "错误: 未知物品: " << item_name;
+      return;
+    }
+    int item_id = it->second;
+    int slot = getbeibao(item_id);
+    if (slot > 0) {
+      beibao[slot][0] = item_id;
+      beibao[slot][1] += amount;
+      if (beibao[slot][1] > 64) beibao[slot][1] = 64;
+      cout << "已获得 " << amount << " " << test[item_id];
+    } else {
+      cout << "错误: 背包已满";
+    }
+  } else if (cmd_name == "time" || cmd_name == "/time") {
+    int w = 0;
+    ss >> w;
+    if (w >= 0 && w <= 40000) {
+      now_time = w;
+      night = (w >= 20000) ? 1 : 0;
+      cout << "时间已设置为 " << w;
+    } else {
+      cout << "错误: 时间必须在0-40000之间";
+    }
+  } else if (cmd_name == "tp" || cmd_name == "/tp") {
+    int w = 0, h = 0;
+    ss >> w >> h;
+    if (w >= 0 && w <= 5000 && h >= 0 && h <= 1000) {
+      x = w;
+      y = (1000 - h);
+      shuaxin();
+      cout << "已传送到 (" << w << ", " << h << ")";
+    } else {
+      cout << "错误: 位置无效";
+    }
+  } else {
+    cout << "未知命令: " << cmd_name << "，输入 /help 查看帮助";
+  }
 }
 short getnew[5001][1001];
 int TT;
